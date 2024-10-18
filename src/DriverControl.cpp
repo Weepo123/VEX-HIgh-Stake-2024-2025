@@ -9,11 +9,14 @@ DriverClass Driver;
 void Control() {
     Driver.Elevation.reset(); // Reset elevation timer
     Controller.ButtonL1.pressed(GoalClamp);
-    Controller.ButtonDown.pressed(HangRobot);
-    Controller.ButtonDown.pressed(ArmSet);
+    task ArmTask([] () -> int {
+        while(true){
+        Driver.ArmSpin();
+        }
+    });
+
     // Main control loop
     while (true) {
-        Driver.ArmSpin();
         Driver.IntakeSpin();           // Control the intake mechanism based on controller input
         Driver.DrivertainSpin();            // Control the drivetrain based on controller input
         Driver.DrivertainTemperature(); // Display motor temperatures on Brain screen and terminal

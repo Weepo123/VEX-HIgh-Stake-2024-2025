@@ -6,7 +6,8 @@
 
 using namespace vex;
 
-void Auto_class::MotorStop(brakeType mode) {
+
+void AutoClass::MotorStop(brakeType mode) {
     // Stop the left motor with the specified braking mode
     LeftMotor.stop(mode);
     
@@ -15,14 +16,14 @@ void Auto_class::MotorStop(brakeType mode) {
 }
 
 
-void Auto_class::MotorSpin(double LeftVelocity, double RightVelocity, velocityUnits units) {
+void AutoClass::MotorSpin(double LeftVelocity, double RightVelocity, velocityUnits units) {
     // Spin the left motor at the specified velocity
     LeftMotor.spin(fwd, LeftVelocity, units);
     // Spin the right motor at the specified velocity
     RightMotor.spin(fwd, RightVelocity, units);
 }
 
-double Auto_class::AverageDifference(std::vector<double> vector1, std::vector<double> vector2) {
+double AutoClass::AverageDifference(std::vector<double> vector1, std::vector<double> vector2) {
     // Determine the size of the vectors and ensure we use the minimum size to avoid out-of-bounds errors
     int VectorSize = std::min((int)vector1.size(), (int)vector2.size());
 
@@ -45,7 +46,7 @@ double Auto_class::AverageDifference(std::vector<double> vector1, std::vector<do
     return AverageDifference;
 }
 
-void Auto_class::Turn(float Rotation, float Velocity, float RotationCenterCm, float ErrorRange, float Timeout) {
+void AutoClass::Turn(float Rotation, float Velocity, float RotationCenterCm, float Timeout) {
     // Calculate the radii for the left and right wheels based on the rotation center
     double LeftRadiusCm = (RobotLength / 2) + RotationCenterCm;
     double RightRadiusCm = (RobotLength / 2) - RotationCenterCm;
@@ -58,7 +59,7 @@ void Auto_class::Turn(float Rotation, float Velocity, float RotationCenterCm, fl
     double RightProportion = -RightRadiusCm / averageRotateRadiusCm;
 
     // Initialize PID controller for controlling the rotation
-    PID RotationPID(0.1, 0, 0.35, ErrorRange);
+    PID RotationPID(0.1, 0, 0.35, DefaultRotateErrorRange);
 
     // Start a timer to enforce the timeout limit
     timer timeout;
@@ -89,7 +90,15 @@ void Auto_class::Turn(float Rotation, float Velocity, float RotationCenterCm, fl
     MotorStop(brake);
 }
 
-void Auto_class::MoveTurnTileWithProfileCalculation(float DistanceTiles, float MaxSpeed, float TargetAngle, float ProportionalGain, float TurnRatio, float Timeout) {
+void AutoClass::MoveTurnTileWithPID(float DistanceTile, float Rotation, float MoveVelocity, float RotateVelocity, float RatioToTurn, float Timeout){
+    MoveTurnCmWithPID(DistanceTile * TileLength, Rotation, MoveVelocity, RotateVelocity, RatioToTurn, Timeout);
+}
+
+void AutoClass::MoveTurnTileWithProfileCalculation(float DistanceCm, float MaxSpeed, float TargetAngle, float ProportionalGain, float TurnRatio, float Timeout){
+    MoveTurnCmWithProfileCalculation(DistanceCm * TileLength, MaxSpeed, TargetAngle, ProportionalGain, TurnRatio, Timeout);
+}
+
+void AutoClass::MoveTurnCmWithProfileCalculation(float DistanceCm, float MaxSpeed, float TargetAngle, float ProportionalGain, float TurnRatio, float Timeout) {
     // Initialize variables for speed control and position tracking
     float CurrentSpeed = 0;
     double CurrentPosition = 0;
@@ -106,7 +115,7 @@ void Auto_class::MoveTurnTileWithProfileCalculation(float DistanceTiles, float M
     RightMotor.resetPosition();
 
     // Calculate target distance in degrees based on tile length and gearing
-    float TargetDegrees = DistanceTiles * TileLength * WheelsPerimeter * GearRatio * CompleteAngle;
+    float TargetDegrees = DistanceCm * WheelsPerimeter * GearRatio * CompleteAngle;
 
     // Calculate maximum achievable velocity based on acceleration limits and user-defined maximum speed
     MaxVelocity = fmin(sqrt(TargetDegrees * AccelerationRate), MaxSpeed * 6);  // Calculate real maxVelocity
@@ -120,7 +129,7 @@ void Auto_class::MoveTurnTileWithProfileCalculation(float DistanceTiles, float M
     MaxVelocityRPM = MaxVelocity / 6;
 
     // Determine movement direction based on target distance sign
-    if (DistanceTiles < 0) {
+    if (DistanceCm < 0) {
         MovementDirection = -1;  // Reverse direction for negative distance
     }
 
@@ -170,9 +179,9 @@ void Auto_class::MoveTurnTileWithProfileCalculation(float DistanceTiles, float M
     MotorStop(brake);
 }
 
-void Auto_class::MoveTurnTileWithPID(float DistanceTile, float Rotation, float MoveVelocity, float RotateVelocity, float RatioToTurn, float ErrorRange, float Timeout){
+void AutoClass::MoveTurnCmWithPID(float DistanceCm, float Rotation, float MoveVelocity, float RotateVelocity, float RatioToTurn, float Timeout){
     // Initialize PID controllers for distance, rotation, and synchronization with respective error ranges
-    PID DistancePID(2.82, 0.02, 0.0, ErrorRange);  // PID for controlling distance
+    PID DistancePID(2.82, 0.02, 0.0, DefaultMoveErrorRange);  // PID for controlling distance
     PID RotationPID(0.1, 0, 0.35, DefaultRotateErrorRange);  // PID for controlling rotation
     PID SynchronizeVelocityPID(0.001, 0.0, 0.0, 100.0);  // PID for synchronizing motor velocities
 
@@ -190,8 +199,8 @@ void Auto_class::MoveTurnTileWithPID(float DistanceTile, float Rotation, float M
         double DistanceError = 0.0;  // Variable to store the distance error
         double RotationError = 0.0;  // Variable to store the rotation error
 
-        // Calculate the target distance in centimeters (1 tile = 60.96 cm)
-        double TargetDistance = (DistanceTile * TileLength);
+        // Calculate the target distance in centimeters
+        double TargetDistance = (DistanceCm);
 
         double LeftVelocityRPM;
         double RightVelocityRPM;

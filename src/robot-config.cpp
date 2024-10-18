@@ -17,13 +17,14 @@ motor R2 = motor(PORT18, ratio6_1, true);
 motor R3 = motor(PORT20, ratio6_1, false);
 
 //Intake Motor
-motor Intake = motor(PORT1, ratio6_1, true);
+motor Intake1 = motor(PORT1, ratio6_1, true);
+motor Intake2 = motor(PORT15, ratio6_1, false);
 
 //Arm Motor
-motor Arm = motor(PORT10, ratio18_1, true);
+motor Arm = motor(PORT16, ratio18_1, true);
 
 //Sensor
-inertial Inertial = inertial(PORT15);
+inertial Inertial = inertial(PORT10);
 distance Distance = distance(PORT2);
 encoder Encoder = encoder(Brain.ThreeWirePort.B);
 
@@ -35,6 +36,7 @@ pneumatics Hang = pneumatics(Brain.ThreeWirePort.C);
 controller Controller = controller(primary);
 
 //Motor Group
+motor_group Intake(Intake1, Intake2);
 motor_group LeftMotor(L1, L2, L3);
 motor_group RightMotor(R1, R2, R3);
 void vexcodeInit(void) {}

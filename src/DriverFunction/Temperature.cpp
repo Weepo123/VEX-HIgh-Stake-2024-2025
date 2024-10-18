@@ -6,7 +6,7 @@ using namespace vex;
 
 void DriverClass::DrivertainTemperature() {
     /* Clear the Brain screen and prepare to print */
-    Brain.Screen.clearScreen();
+    // Brain.Screen.clearScreen();
     Brain.Screen.printAt(220, 20, "L1: %.3f", L1.temperature(celsius));
     Brain.Screen.printAt(220, 40, "L2: %.3f", L2.temperature(celsius));
     Brain.Screen.printAt(220, 60, "L3: %.3f", L3.temperature(celsius));

@@ -2,59 +2,47 @@
 #include "vex.h"
 #include "robot-config.h"
 #include "DriverFunction/DriverFunction.h"
+#include "AutoFunction/PID.h"
 
 // Global variables to control the arm's state
 bool SetToGrapRing = true;  // Flag to indicate if the arm should move to grasp a ring
 bool ResetHand = false;     // Flag to indicate if the arm should reset to its initial position
 
 // Constants for arm positions (in degrees)
-int GrapRingPosition = 30;  // Position for grasping rings
+int GrapRingPosition = -65;  // Position for grasping rings
 int ArmMaxPosition = 270;   // Maximum allowed position for the arm
-int ArmMinPosition = 5;     // Minimum allowed position for the arm
+int ArmMinPosition = 1;     // Minimum allowed position for the arm
+double InitialArmPosition = Arm.position(degrees);
 
-// Function to automatically set the arm's position
-void ArmSet() {
-    // If the arm is set to grasp a ring
-    if(SetToGrapRing){
-        // If the arm hasn't reached the grasping position yet
-        if (Arm.position(deg) < GrapRingPosition) {
-            Arm.spin(fwd, -12, volt);  // Move the arm forward at 12 volts
-        }
-        // If the arm has reached or passed the grasping position
-        if (Arm.position(deg) >= GrapRingPosition) {
-            Arm.stop(hold);           // Stop the arm and hold its position
-            SetToGrapRing = false;    // Turn off the grasping flag
-            ResetHand = true;         // Set the flag to reset the arm
-        }
-    }
-
-    // If the arm is set to reset
-    if (ResetHand) {
-        // If the arm is at or past the maximum position
-        if (Arm.position(deg) >= ArmMaxPosition) {
-            Arm.spin(fwd, 12, volt); // Move the arm backward at 12 volts
-        }
-        // If the arm has moved past the minimum position but not reached max
-        else if (Arm.position(deg) > ArmMinPosition) {
-            Arm.stop(coast);          // Stop the arm and allow it to coast
-            ResetHand = false;        // Turn off the reset flag
-            SetToGrapRing = true;     // Set the flag to grasp rings again
-        }
-    }
-}
-
-// Function to manually control the arm's position
 void DriverClass::ArmSpin() {
-    // If the Up button is pressed and the arm is within the allowed range
+    // If the Up button is pressed and the arm is below the maximum position
     if (Controller.ButtonY.pressing()) {
-        Arm.spin(fwd, 12, volt);      // Move the arm forward at 12 volts
+        Arm.spin(fwd, 12, volt);  // Move the arm forward at 12 volts
     }
-    // If the Down button is pressed and the arm is within the allowed range
+    // If the Down button is pressed and the arm is above the minimum position
     else if (Controller.ButtonRight.pressing()) {
-        Arm.spin(fwd, -12, volt);     // Move the arm backward at 12 volts
+        Arm.spin(fwd, -12, volt); // Move the arm backward at 12 volts
     }
-    // If no button is pressed or the arm is outside the allowed range
-    else {
-        Arm.stop(hold);              // Stop the arm and apply the brake
+    else if (Controller.ButtonDown.pressing()){
+        // Initialize PID controller with tuned values
+        PID RotationPID(1, 0.005, 0.15, 2.0, 3.0);
+        timer Timer;
+        Timer.reset();
+        // Decide which position to move to based on the flags
+        double TargetPosition = SetToGrapRing ? GrapRingPosition : ArmMinPosition;
+
+        // Execute the PID loop until the arm reaches the target or timeout
+        while (!(RotationPID.isSettled() && Timer.value() > 1)) {
+            double TravelArmPosition = Arm.position(degrees);
+            double CurrentArmPostion = TravelArmPosition - InitialArmPosition;
+            double RotationError = TargetPosition - CurrentArmPostion;
+            RotationPID.PIDCalculate(RotationError);
+            double RotationVelocityRPM = fmin(600, fmax(-600, RotationPID.Value()));
+            Arm.spin(fwd, RotationVelocityRPM, rpm);
+            wait(10, msec);
+        }
+    } else {
+        // Stop the arm and hold position
+        Arm.stop(hold);
     }
 }

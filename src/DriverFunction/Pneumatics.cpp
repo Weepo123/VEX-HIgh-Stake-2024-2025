@@ -14,14 +14,3 @@ void GoalClamp(){
         clamp = true;
     }
 }
-
-void HangRobot(){
-    if(hang){
-        Hang.open();
-        hang = false;
-    }
-    else if(!hang){
-        Hang.close();
-        hang = true;
-    }
-}

@@ -4,17 +4,6 @@
 
 using namespace vex;
 
-/**
- * @brief Automatically controls the arm movement for grasping and resetting.
- * 
- * The function moves the arm to a specified position to grasp a ring and holds it there.
- * Once the arm reaches the grasping position, it stops and sets a flag to reset the arm.
- * When resetting, the arm moves back to its initial position and prepares to grasp the next ring.
- * The function ensures that the arm stays within the defined minimum and maximum positions.
- */
-
-void ArmSet();
-
 class DriverClass{
     public:
         timer Elevation;
@@ -70,6 +59,6 @@ class DriverClass{
          * The function applies a fixed voltage (12V) for movement in either direction.
          */
         void ArmSpin();
-
+        
     private:
 };

@@ -8,9 +8,9 @@
 
 using namespace vex;
 
-class Auto_class{
+class AutoClass{
     public:
-        Auto_class(){}
+        AutoClass(){}
 
         /**
          * @brief Stops the motors with a specified braking mode.
@@ -44,20 +44,6 @@ class Auto_class{
          */
         double AverageDifference(std::vector<double> vector1, std::vector<double> vector2);
         /**
-         * @brief Moves the robot a specified distance in tiles with speed control and turning correction.
-         * 
-         * This function controls the movement of the robot to a target distance in tiles, 
-         * adjusting speed dynamically and correcting for turning errors using a PID controller.
-         * 
-         * @param DistanceTiles The distance to move in tiles.
-         * @param MaxSpeed The maximum speed limit (in RPM).
-         * @param TargetAngle The target angle to turn (in degrees).
-         * @param ProportionalGain The proportional gain for the turning PID controller.
-         * @param TurnRatio The ratio of distance traveled to target distance where turning correction starts.
-         * @param Timeout The maximum time allowed for the operation (in milliseconds).
-         */
-        void MoveTurnTileWithProfileCalculation(float DistanceTiles, float MaxSpeed = 600.0, float TargetAngle = Inertial.rotation(), float ProportionalGain = 0.0, float TurnRatio = 0.0, float Timeout = 5);
-        /**
          * @brief Turns the robot by a specified rotation angle.
          * 
          * This function uses a PID controller to turn the robot by a given rotation angle (in degrees). 
@@ -67,11 +53,23 @@ class Auto_class{
          * @param Rotation The target rotation angle in degrees.
          * @param Velocity The maximum velocity for the rotation (in RPM).
          * @param RotationCenterCm The center of rotation in centimeters.
-         * @param ErrorRange The acceptable error range for the rotation PID control.
          * @param Timeout The maximum time allowed for the operation (in milliseconds).
          */
-        void Turn(float Target, float Velocity = 600.0, float RotationCenterCm = 0, float ErrorRange = 0.5, float Timeout = 3);
-
+        void Turn(float Target, float Velocity = 600.0, float RotationCenterCm = 0, float Timeout = 3);
+        /**
+         * @brief Moves the robot a specified distance in tiles with speed control and turning correction.
+         * 
+         * This function controls the movement of the robot to a target distance in tiles, 
+         * adjusting speed dynamically and correcting for turning errors using a PID controller.
+         * 
+         * @param DistanceTiles The distance to move in tile.
+         * @param MaxSpeed The maximum speed limit (in RPM).
+         * @param TargetAngle The target angle to turn (in degrees).
+         * @param ProportionalGain The proportional gain for the turning PID controller.
+         * @param TurnRatio The ratio of distance traveled to target distance where turning correction starts.
+         * @param Timeout The maximum time allowed for the operation (in milliseconds).
+         */
+        void MoveTurnTileWithProfileCalculation(float DistanceTiles, float MaxSpeed = 600.0, float TargetAngle = Inertial.rotation(), float ProportionalGain = 0.0, float TurnRatio = 0.0, float Timeout = 5);
         /**
          * @brief Moves the robot a specified distance while also turning it by a specified angle.
          *
@@ -79,17 +77,47 @@ class Auto_class{
          * simultaneously turn it by a specified rotation angle. The function ensures the robot moves at 
          * controlled velocities and adjusts for errors in distance and rotation using encoder feedback.
          * 
-         * @param DistanceTile The target distance to move in tiles (1 tile = 60.96 cm).
+         * @param DistanceTile The target distance to move in cm (1 tile = 60.96 cm).
          * @param Rotation The target rotation angle in degrees.
          * @param MoveVelocity The maximum velocity for moving the robot (in RPM).
          * @param RotateVelocity The maximum velocity for turning the robot (in RPM).
          * @param RatioToTurn The ratio to control the turning rate.
-         * @param ErrorRang The acceptable error range for distance PID control.
          * @param Timeout The maximum time allowed for the operation (in milliseconds).
          * */
-        void MoveTurnTileWithPID(float DistanceTile, float Rotation = Inertial.rotation(), float MoveVelocity = 600.0, float RotateVelocity = 600.0, float RatioToTurn = 0.0, float ErrorRang = 1, float Timeout = 5);
+        void MoveTurnTileWithPID(float DistanceTile, float Rotation = Inertial.rotation(), float MoveVelocity = 600.0, float RotateVelocity = 600.0, float RatioToTurn = 0.0, float Timeout = 5);
+        /**
+         * @brief Moves the robot a specified distance while also turning it by a specified angle.
+         *
+         * This function uses PID controllers to move the robot a certain distance (measured in cm) and 
+         * simultaneously turn it by a specified rotation angle. The function ensures the robot moves at 
+         * controlled velocities and adjusts for errors in distance and rotation using encoder feedback.
+         * 
+         * @param DistanceTile The target distance to move in cm.
+         * @param Rotation The target rotation angle in degrees.
+         * @param MoveVelocity The maximum velocity for moving the robot (in RPM).
+         * @param RotateVelocity The maximum velocity for turning the robot (in RPM).
+         * @param RatioToTurn The ratio to control the turning rate.
+         * @param Timeout The maximum time allowed for the operation (in milliseconds).
+         * */
+        void MoveTurnCmWithPID(float DistanceTile, float Rotation = Inertial.rotation(), float MoveVelocity = 600.0, float RotateVelocity = 600.0, float RatioToTurn = 0.0, float Timeout = 5);
+        /**
+         * @brief Moves the robot a specified distance in tiles with speed control and turning correction.
+         * 
+         * This function controls the movement of the robot to a target distance in tiles, 
+         * adjusting speed dynamically and correcting for turning errors using a PID controller.
+         * 
+         * @param DistanceTiles The distance to move in cm.
+         * @param MaxSpeed The maximum speed limit (in RPM).
+         * @param TargetAngle The target angle to turn (in degrees).
+         * @param ProportionalGain The proportional gain for the turning PID controller.
+         * @param TurnRatio The ratio of distance traveled to target distance where turning correction starts.
+         * @param Timeout The maximum time allowed for the operation (in milliseconds).
+         */
+        void MoveTurnCmWithProfileCalculation(float DistanceCm, float MaxSpeed = 600.0, float TargetAngle = Inertial.rotation(), float ProportionalGain = 0.0, float TurnRatio = 0.0, float Timeout = 5);
         
     private:
+        //Defalt Move error range for moving 
+        double DefaultMoveErrorRange = 1;
         //Default Rotate error range for turning
         double DefaultRotateErrorRange = 0.5;
         //Length of one tile in centimeters

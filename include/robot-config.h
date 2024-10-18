@@ -15,7 +15,8 @@ extern motor R2;
 extern motor R3;
 
 //Intake Motor
-extern motor Intake;
+extern motor Intake1;
+extern motor Intake2;
 
 //Arm Motor
 extern motor Arm;
@@ -32,5 +33,6 @@ extern pneumatics Hang;
 extern controller Controller;
 
 //Motor Group
+extern motor_group Intake;
 extern motor_group RightMotor;
 extern motor_group LeftMotor;

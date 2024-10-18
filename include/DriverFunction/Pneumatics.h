@@ -3,5 +3,3 @@
 #include "robot-config.h"
 
 void GoalClamp();
-
-void HangRobot();
